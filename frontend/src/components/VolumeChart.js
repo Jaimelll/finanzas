@@ -2,25 +2,38 @@ import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Utility functions for axis formatting (consistent with PriceChart)
-const formatTimeAxis = (tick, index, ticks) => {
-  const date = new Date(tick);
-  const hour = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+const CustomXAxisTick = ({ x, y, payload, index, visibleTicks }) => {
+  const date = new Date(payload.value);
+  const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
   // Check if this is the first tick of a new day
   let showDate = false;
   if (index === 0) {
     showDate = true;
-  } else if (ticks && ticks[index - 1]) {
-    const prevDate = new Date(ticks[index - 1]);
+  } else if (visibleTicks && visibleTicks[index - 1]) {
+    const prevDate = new Date(visibleTicks[index - 1].value);
     showDate = date.toDateString() !== prevDate.toDateString();
   }
 
   if (showDate) {
-    const day = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    return `${hour}\n${day}`;
+    const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text x={0} y={0} dy={16} textAnchor="middle" fill="#666" fontSize={12} fontWeight="normal">
+          {timeStr}
+        </text>
+        <text x={0} y={0} dy={32} textAnchor="middle" fill="#666" fontSize={10} fontWeight="normal">
+          {dateStr}
+        </text>
+      </g>
+    );
   }
 
-  return hour;
+  return (
+    <text x={x} y={y} dy={16} textAnchor="middle" fill="#666" fontSize={12} fontWeight="normal">
+      {timeStr}
+    </text>
+  );
 };
 
 const formatVolumeAxis = (value) => {
@@ -73,7 +86,7 @@ const VolumeChart = ({ data }) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="timestamp"
-            tickFormatter={formatTimeAxis}
+            tick={<CustomXAxisTick />}
             height={80}
             interval="preserveStartEnd"
           />
