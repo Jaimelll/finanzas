@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import logging
+import requests
 from datetime import datetime, timedelta
-from binance.client import Client
 from .indicators_service import calculate_indicators
 
 # Configure logging
@@ -26,8 +26,8 @@ def generate_mock_data(limit=100):
     timestamps = [end_time - timedelta(hours=i) for i in range(limit)]
     timestamps.reverse()  # Oldest first
 
-    # Generate realistic BTC prices around $60,000
-    base_price = 60000
+    # Generate realistic BTC prices around $115,000
+    base_price = 115000
     data = []
 
     for i, ts in enumerate(timestamps):
@@ -58,6 +58,8 @@ def generate_mock_data(limit=100):
         })
 
     df = pd.DataFrame(data)
+    latest_mock_price = df['close'].iloc[-1]
+    logger.info(f"Mock data generated - latest price: ${latest_mock_price:,.2f}")
     return df
 
 def get_bitcoin_data(interval='1h', limit=100):
@@ -73,9 +75,11 @@ def get_bitcoin_data(interval='1h', limit=100):
         pd.DataFrame: DataFrame with OHLCV and indicator columns
     """
     try:
-        logger.info(f"Fetching Bitcoin data from Binance API: interval={interval}, limit={limit}")
-        client = Client(api_key='', api_secret='')  # Public API, no key required
-        klines = client.get_klines(symbol='BTCUSDT', interval=interval, limit=limit)
+        logger.info(f"Fetching Bitcoin data from Binance public API: interval={interval}, limit={limit}")
+        url = f"https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval={interval}&limit={limit}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        klines = response.json()
 
         if not klines:
             raise ValueError("No data returned from Binance API")
@@ -89,14 +93,22 @@ def get_bitcoin_data(interval='1h', limit=100):
 
         # Process data
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-        df = df[['timestamp', 'open', 'high', 'low', 'close', 'volume']].astype(float)
+        # Convert only numeric columns to float
+        numeric_columns = ['open', 'high', 'low', 'close', 'volume']
+        df[numeric_columns] = df[numeric_columns].astype(float)
+        df = df[['timestamp'] + numeric_columns]
 
+        # Log the latest price for verification
+        latest_price = df['close'].iloc[-1]
         logger.info(f"Successfully fetched {len(df)} data points from Binance API")
+        logger.info(f"Latest BTC/USDT price from Binance: ${latest_price:,.2f}")
+        logger.info(f"Price range: ${df['low'].min():,.2f} - ${df['high'].max():,.2f}")
 
     except Exception as e:
         logger.error(f"Failed to fetch data from Binance API: {str(e)}")
-        logger.info("Falling back to mock data")
+        logger.warning("Binance API unavailable - falling back to mock data")
         df = generate_mock_data(limit)
+        logger.info(f"Using mock data with {len(df)} data points")
 
     # Calculate indicators
     try:

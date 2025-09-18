@@ -6,7 +6,7 @@ A full-stack web application for Bitcoin swing trading analysis featuring real-t
 
 ## Features
 
-- **Real-time Data**: Bitcoin OHLCV data fetched from Binance API
+- **Real-time Data**: Live Bitcoin OHLCV data fetched from Binance BTC/USDT pair
 - **Technical Indicators**:
   - Moving Averages (SMA, EMA)
   - Relative Strength Index (RSI)
@@ -110,10 +110,23 @@ The frontend will proxy API requests to the backend.
 - **Data Interval**: Modify the `interval` parameter in API calls (default: '1h')
 - **API Base URL**: Set `REACT_APP_API_BASE_URL` environment variable for frontend (default: http://localhost:8000/api for development, automatically configured for Docker)
 - **Fallback Data**: If Binance API is unavailable, the backend automatically provides mock data for testing
+- **Price Accuracy**: Displayed prices match Binance's live BTC/USDT market data
 
 ## Environment Variables
 
 - `REACT_APP_API_BASE_URL`: Frontend API endpoint (optional, defaults handled automatically)
+
+## API Configuration
+
+The application uses Binance's public API endpoints for fetching Bitcoin price data. **No API key is required** for accessing price and OHLCV data, as these endpoints are publicly available without authentication.
+
+- Price data endpoint: `https://api.binance.com/api/v3/ticker/price`
+- OHLCV data endpoint: `https://api.binance.com/api/v3/klines`
+
+If you later decide to use authenticated API requests (e.g., for trading or private data), you will need to:
+1. Create a `.env` file in the backend directory
+2. Add your Binance API key and secret
+3. Ensure `.env` is added to `.gitignore` to keep secrets out of version control
 
 ## Project Structure
 
