@@ -110,7 +110,32 @@ The frontend will proxy API requests to the backend.
 - **Data Interval**: Modify the `interval` parameter in API calls (default: '1h')
 - **API Base URL**: Set `REACT_APP_API_BASE_URL` environment variable for frontend (default: http://localhost:8000/api for development, automatically configured for Docker)
 - **Fallback Data**: If Binance API is unavailable, the backend automatically provides mock data for testing
+
+## Chart Formatting
+
+The dashboard features enhanced chart formatting for improved readability and consistency:
+
+### Y-Axis Formatting
+- **Price Charts**: Dynamic scaling with thousand separators and "USD" suffix (e.g., "117,500 USD")
+- **Volume Charts**: Abbreviated format for large numbers (e.g., "1.2K" for 1,200)
+- **RSI Charts**: Clean numeric display with key levels (0, 20, 30, 70, 80, 100)
+- **MACD Charts**: Precise decimal formatting for technical indicators
+
+### X-Axis Formatting
+- **Time Display**: Stacked format showing day above hour (e.g., "Sep 18" above "14:00")
+- **Synchronization**: Identical time formatting across all chart panels for easy cross-chart comparison
+- **Responsive**: Optimized for various screen sizes with appropriate spacing
+
+### Examples
+- Price axis: `105,000 USD`, `110,000 USD`, `115,000 USD`
+- Time axis:
+  ```
+  Sep 18
+  14:00
+  ```
+- Volume axis: `500`, `1.2K`, `2.5K`
 - **Price Accuracy**: Displayed prices match Binance's live BTC/USDT market data
+- **Enhanced Chart Formatting**: Improved axis readability with dynamic scaling, thousand separators, and consistent time formatting across all charts
 
 ## Environment Variables
 
